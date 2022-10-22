@@ -21,16 +21,19 @@ function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setisAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setisEditAvatarPopupOpen] = useState(false);
+  // const [isInfoToolTipOpen, setisInfoToolTipOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [cards, setCards] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [email, setEmail] = useState(null);
   const navigate = useNavigate();
 
   function closeAllPopups() {
     setisEditAvatarPopupOpen(false);
     setisAddPlacePopupOpen(false);
     setIsEditProfilePopupOpen(false);
+    // setisInfoToolTipOpen(false);
     setSelectedCard(null);
   }
 
@@ -104,8 +107,14 @@ function App() {
   };
 
   const handleEnterClick = () => {
+    console.log("handleEnterClick");
     navigate("*");
   };
+  function signOut() {
+    localStorage.removeItem('jwt');
+    handleLoginClick();
+  }
+
 
   const handleTokenCheck = () => {
     if (localStorage.getItem("jwt")) {
@@ -113,7 +122,9 @@ function App() {
       // проверяем токен пользователя
       auth.checkToken(jwt).then((res) => {
         if (res) {
+          setEmail(res.data.email);
           setLoggedIn(true);
+
         }
       });
     }
@@ -146,7 +157,7 @@ function App() {
   return (
     <div className="App">
       <CurrentUserContext.Provider value={currentUser}>
-        <Header />
+        <Header isLoggedIn={loggedIn} email={email} signOut={signOut}/>
         <Routes>
           <Route
             path="*"
@@ -177,7 +188,7 @@ function App() {
         </Routes>
 
         <Footer />
-        <InfoTooltip />
+        {/* <InfoTooltip isOpen={isInfoToolTipOpen} onClose={closeAllPopups}/> */}
         <EditProfilePopup
           isOpen={isEditProfilePopupOpen}
           onClose={closeAllPopups}
@@ -210,3 +221,36 @@ function App() {
 }
 
 export default App;
+
+
+
+
+// if (path="*")  {
+//   return 
+//     <header className="header">
+//     <img className="header__logo" src={logo} alt="Логотип" />
+//   <div>
+//     {" "}
+//     <p className="header__login">{props.email}</p>{" "}
+//     <button onClick={props.signOut}  className="header__login">
+//       Выйти
+//     </button>
+//     </div>
+//      </header>
+//  } if (path="/signup") {
+//    return
+//   <header className="header">
+//   <img className="header__logo" src={logo} alt="Логотип" />
+//   <Link to="/signin" className="header__login">
+//     Войти
+//   </Link>
+//   </header>
+// } else {
+// return
+// (  <header className="header">
+// <img className="header__logo" src={logo} alt="Логотип" />
+// <Link to="/signup" className="header__login">
+// Регистрация
+// </Link>
+// </header>)
+// }

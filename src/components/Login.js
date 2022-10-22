@@ -1,67 +1,110 @@
-import React from 'react';
+import React from "react";
 // import { useNavigate } from 'react-router-dom';
-import InfoTooltip from './InfoTooltip';
-import * as auth from '../auth.js';
-
+import InfoTooltip from "./InfoTooltip";
+import iconDenied from "../images/denied.svg";
+import * as auth from "../auth.js";
 
 class Login extends React.Component {
-  constructor(props){
+  constructor(props) {
     super(props);
     this.state = {
-        email: '',
-      password: ''
-    }
+      email: "",
+      password: "",
+      tipOpen: false,
+      errorMessage: null,
+    };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-
   }
   handleChange(e) {
-    const {name, value} = e.target;
+    const { name, value } = e.target;
     this.setState({
-      [name]: value
+      [name]: value,
     });
   }
-  handleSubmit(e){
+
+  handleTipClose() {
+    this.setState({ tipOpen: false });
+  }
+
+  handleSubmit(e) {
     e.preventDefault();
     // здесь обрабатываем вход в систему
-    if (!this.state.email || !this.state.password){
-        return;
-      }
-      auth.authorize(this.state.email, this.state.password)
+    if (!this.state.email || !this.state.password) {
+        this.setState({
+            errorMessage: "Что-то пошло не так! Попробуйте ещё раз",
+            tipOpen: true,
+          });
+      return;
+    }
+    auth
+      .authorize(this.state.email, this.state.password)
       .then((data) => {
-        if (data.jwt){
-    this.setState({email: '',
-            password: ''},() => {
-    // this.props.handleLogin();
-      this.props.onLoginSuccess();
-    /* переадресовать пользователя на /diary методом history.push */;
-    })
-  }
-        // нужно проверить, есть ли у данных jwt
-        // сбросьте стейт, затем в колбэке установите
-        // стейт loggedIn родительского App как true,
-        // затем перенаправьте его в /diary
+        if (data.token) {
+          this.setState({ email: "", password: "", tipOpen: false, }, () => {
+            this.props.onLoginSuccess();
+          });
+        }
+        else {
+                  this.setState({
+          errorMessage: data.message,
+          tipOpen: true,
+        });
+        }
       })
-      .catch(err => console.log(err));
+      .catch((err) => console.log(err));
+    //   if (!this.state.email || this.state.password) {
+    //     this.setState({
+    //       errorMessage: "Что-то пошло не так! Попробуйте ещё раз",
+    //       tipOpen: true,
+    //     });
+    //   }
   }
-  render(){
-    return(
-        <>
-      <div className="login">
-        <p className="login__welcome">
-          Вход
-        </p>
-        <form onSubmit={this.handleSubmit} className="login__form">
-          <input required className="login__input" placeholder="Email" id="email" name="email" type="email" value={this.state.email} onChange={this.handleChange} />
-          <input required className="login__input" placeholder="Пароль"  id="password" name="password" type="password" value={this.state.password} onChange={this.handleChange} />
-          <div className="login__button-container">
-            <button type="submit" className="login__link">Войти</button>
-          </div>
-        </form>
-      </div>
-      <InfoTooltip />
+  render() {
+    return (
+      <>
+        <div className="enter enter_login">
+          <p className="enter__welcome">Вход</p>
+          <form onSubmit={this.handleSubmit} className="enter__form">
+            <input
+              required
+              className="enter__input"
+              placeholder="Email"
+              id="email"
+              name="email"
+              type="email"
+              value={this.state.email}
+              onChange={this.handleChange}
+            />
+            <input
+              required
+              className="enter__input"
+              placeholder="Пароль"
+              id="password"
+              name="password"
+              type="password"
+              value={this.state.password}
+              onChange={this.handleChange}
+            />
+            <div className="enter__button-container">
+              <button type="submit" className="enter__button">
+                Войти
+              </button>
+            </div>
+          </form>
+        </div>
+        {this.state.tipOpen && (
+          <InfoTooltip
+            isOpen={this.state.tipOpen}
+            name="tip "
+            onClose={() => this.handleTipClose()}
+          >
+            <img className="popup__icon" src={iconDenied} alt={"Неудача"} />
+            <p className="popup__icon-title">{this.state.errorMessage}</p>
+          </InfoTooltip>
+        )}
       </>
-    )
+    );
   }
 }
 

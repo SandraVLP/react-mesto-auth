@@ -29,11 +29,11 @@ export const authorize = (email, password) => {
       body: JSON.stringify({email, password})
     })
     .then((response => response.json()))
-    .then((data) => {
+    .then((data) => { 
       if (data.token){
         localStorage.setItem('jwt', data.token);
-        return data;
       } 
+      return data;
     })
     .catch(err => console.log(err))
   };

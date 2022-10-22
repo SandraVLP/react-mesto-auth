@@ -1,3 +1,5 @@
+import { Children } from "react";
+
 function InfoTooltip(props) {
 
 
@@ -9,12 +11,7 @@ function InfoTooltip(props) {
           className="popup__close_element popup__close"
           onClick={props.onClose}
         ></button>
-        <img
-          className="popup__icon"
-          src={props.src}
-          alt={props.alt}
-        />
-        <p className="popup__icon-title">{props.title}</p>
+        {props.children}
       </div>
     </div>
   );
