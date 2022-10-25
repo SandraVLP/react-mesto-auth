@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import InfoTooltip from "./InfoTooltip";
-import * as auth from "../auth.js";
+import * as auth from "../utils/auth.js";
 import iconSuccess from "../images/Union.svg";
 import iconDenied from "../images/denied.svg";
 
@@ -27,60 +27,51 @@ class Register extends React.Component {
   handleSubmit = (e) => {
     e.preventDefault();
     // здесь обработчик регистрации
-    auth.register(this.state.password, this.state.email).then((res) => {
-      if (res) {
-        this.setState(
-          {
-            errorMessage: res.error ? res.error : null,
-            isSuccess: !res.error,
-          },
-          () => {
-            this.setState({
-              tipOpen: true,
-            });
-          }
-        );
+    this.props.onRegister(this.state.password, this.state.email);
+    // auth.register(this.state.password, this.state.email).then((res) => {
+    //   if (res) {
+    //     this.setState(
+    //       {
+    //         errorMessage: res.error ? res.error : null,
+    //         isSuccess: !res.error,
+    //       },
+    //       () => {
+    //         this.setState({
+    //           tipOpen: true,
+    //         });
+    //       }
+    //     );
 
-        // if (res.error) {
-        //   this.setState({
-        //     errorMessage: res.error,
-        //     tipOpen: true,
-        //     isSuccess: false,
-        //   });
-        // } else {
-        //   this.setState({
-        //     errorMessage: null,
-        //     tipOpen: true,
-        //     isSuccess: true,
-        //   });
-        // }
-      } else {
-        this.setState({
-          errorMessage: "Что-то пошло не так! Попробуйте ещё раз.",
-          tipOpen: true,
-          isSuccess: false,
-        });
-      }
-    });
+    //     // if (res.error) {
+    //     //   this.setState({
+    //     //     errorMessage: res.error,
+    //     //     tipOpen: true,
+    //     //     isSuccess: false,
+    //     //   });
+    //     // } else {
+    //     //   this.setState({
+    //     //     errorMessage: null,
+    //     //     tipOpen: true,
+    //     //     isSuccess: true,
+    //     //   });
+    //     // }
+    //   } else {
+    //     this.setState({
+    //       errorMessage: "Что-то пошло не так! Попробуйте ещё раз.",
+    //       tipOpen: true,
+    //       isSuccess: false,
+    //     });
+    //   }
+    // });
   };
 
-  handleTipClose() {
-    this.setState({ tipOpen: false }, () => {
-      if (this.state.isSuccess) {
-        this.props.onRegSuccess();
-      }
-    });
-  }
 
   render() {
     return (
       <>
         <div className="enter enter_register">
           <p className="enter__welcome">Регистрация</p>
-          <form
-            onSubmit={this.handleSubmit}
-            className="enter__form "
-          >
+          <form onSubmit={this.handleSubmit} className="enter__form ">
             <label htmlFor="email">Email:</label>
             <input
               className="enter__input"
@@ -117,7 +108,7 @@ class Register extends React.Component {
             </Link>
           </div>
         </div>
-        {this.state.tipOpen && (
+        {/* {this.state.tipOpen && (
           <InfoTooltip
             isOpen={this.state.tipOpen}
             name="tip "
@@ -134,7 +125,7 @@ class Register extends React.Component {
                 : this.state.errorMessage}
             </p>
           </InfoTooltip>
-        )}
+        )} */}
       </>
     );
   }

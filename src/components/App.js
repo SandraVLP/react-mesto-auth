@@ -15,25 +15,29 @@ import Login from "./Login";
 import Register from "./Register";
 import ProtectedRoute from "./ProtectedRoute";
 import InfoTooltip from "./InfoTooltip";
-import * as auth from "../auth.js";
+import * as auth from "../utils/auth";
+import iconSuccess from "../images/Union.svg";
+import iconDenied from "../images/denied.svg";
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setisAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setisEditAvatarPopupOpen] = useState(false);
-  // const [isInfoToolTipOpen, setisInfoToolTipOpen] = useState(false);
+  const [isInfoToolTipOpen, setisInfoToolTipOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [cards, setCards] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [email, setEmail] = useState(null);
+  const [email, setEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
 
   function closeAllPopups() {
     setisEditAvatarPopupOpen(false);
     setisAddPlacePopupOpen(false);
     setIsEditProfilePopupOpen(false);
-    // setisInfoToolTipOpen(false);
+    setisInfoToolTipOpen(false);
     setSelectedCard(null);
   }
 
@@ -102,85 +106,127 @@ function App() {
       });
   }
 
-  const handleLoginClick = () => {
-    navigate("/signin");
-  };
-
-  const handleEnterClick = () => {
-    console.log("handleEnterClick");
-    navigate("*");
-  };
   function signOut() {
-    localStorage.removeItem('jwt');
-    handleLoginClick();
+    localStorage.removeItem("jwt");
+    setLoggedIn(false);
+    navigate("/signin");
   }
-
 
   const handleTokenCheck = () => {
     if (localStorage.getItem("jwt")) {
       const jwt = localStorage.getItem("jwt");
-      // проверяем токен пользователя
-      auth.checkToken(jwt).then((res) => {
-        if (res) {
-          setEmail(res.data.email);
-          setLoggedIn(true);
 
-        }
-      });
+      // проверяем токен пользователя
+      auth
+        .checkToken(jwt)
+        .then((res) => {
+          if (res) {
+            setEmail(res.data.email);
+            setLoggedIn(true);
+            navigate("/");
+          }
+        })
+        .catch((err) => {
+          console.log(`Ошибка; ${err}`);
+        });
     }
   };
+
+  function handleErrorMessages(err) {
+    if (err === 400) {
+      setErrorMessage("некорректно заполнено одно из полей ");
+    }
+    if (err === 401) {
+      setErrorMessage("Пользователь с email не найден ");
+    }
+  }
+
+  const handleLogin = (email, password) => {
+    auth
+      .authorize(email, password)
+      .then((data) => {
+        if (data.token) {
+          handleTokenCheck();
+          navigate("*");
+        }
+      })
+      .catch((err) => {
+        handleErrorMessages(err);
+        setisInfoToolTipOpen(true);
+      });
+  };
+
+  function handleRegister(password, email) {
+    auth
+      .register(password, email)
+      .then((res) => {
+        if (res) {
+          setErrorMessage(null);
+          setisInfoToolTipOpen(true);
+          setIsSuccess(true);
+        }
+      })
+      .catch((err) => {
+        handleErrorMessages(err);
+        setIsSuccess(false);
+        setisInfoToolTipOpen(true);
+      });
+  }
 
   React.useEffect(() => {
     handleTokenCheck();
   }, []);
 
   React.useEffect(() => {
-    Promise.all([api.getInitialCards()])
-      .then(([cards]) => {
-        setCards(cards);
-      })
-      .catch((err) => {
-        console.log(`Ошибка; ${err}`);
-      });
+    if (loggedIn) {
+      Promise.all([api.getInitialCards()])
+        .then(([cards]) => {
+          setCards(cards);
+        })
+        .catch((err) => {
+          console.log(`Ошибка; ${err}`);
+        });
+    }
   }, [loggedIn]);
 
   React.useEffect(() => {
-    Promise.all([api.getProfileData()])
-      .then(([profile]) => {
-        setCurrentUser(profile);
-      })
-      .catch((err) => {
-        console.log(`Ошибка; ${err}`);
-      });
+    if (loggedIn) {
+      Promise.all([api.getProfileData()])
+        .then(([profile]) => {
+          setCurrentUser(profile);
+        })
+        .catch((err) => {
+          console.log(`Ошибка; ${err}`);
+        });
+    }
   }, [loggedIn]);
 
   return (
     <div className="App">
       <CurrentUserContext.Provider value={currentUser}>
-        <Header isLoggedIn={loggedIn} email={email} signOut={signOut}/>
+        <Header email={email} signOut={signOut} />
         <Routes>
           <Route
             path="*"
             element={
-              <ProtectedRoute hasAccess={true} component={Main} 
-                  onEditAvatar={() => setisEditAvatarPopupOpen(true)}
-                  onEditProfile={() => setIsEditProfilePopupOpen(true)}
-                  onAddPlace={() => setisAddPlacePopupOpen(true)}
-                  onCardClick={(selectedCard) => handleCardClick(selectedCard)}
-                  onCardLike={handleCardLike}
-                  onCardDelete={handleCardDelete}
-                  cards={cards}
+              <ProtectedRoute
+                hasAccess={loggedIn}
+                component={Main}
+                onEditAvatar={() => setisEditAvatarPopupOpen(true)}
+                onEditProfile={() => setIsEditProfilePopupOpen(true)}
+                onAddPlace={() => setisAddPlacePopupOpen(true)}
+                onCardClick={(selectedCard) => handleCardClick(selectedCard)}
+                onCardLike={handleCardLike}
+                onCardDelete={handleCardDelete}
+                cards={cards}
               />
             }
           />
           <Route
             path="/signup"
-            element={<Register onRegSuccess={() => handleLoginClick()} />}
+            element={<Register onRegister={handleRegister} />}
           />
-          <Route
-            path="/signin"
-            element={<Login onLoginSuccess={() => handleEnterClick()} />}
-          />
+          <Route path="/signin" element={<Login onLogin={handleLogin} />} />
           <Route
             path="*"
             element={loggedIn ? <Navigate to="*" /> : <Navigate to="/signin" />}
@@ -188,7 +234,6 @@ function App() {
         </Routes>
 
         <Footer />
-        {/* <InfoTooltip isOpen={isInfoToolTipOpen} onClose={closeAllPopups}/> */}
         <EditProfilePopup
           isOpen={isEditProfilePopupOpen}
           onClose={closeAllPopups}
@@ -215,6 +260,22 @@ function App() {
     isOpen={}
     /> */}
         <ImagePopup card={selectedCard} onClose={() => closeAllPopups(true)} />
+        {isInfoToolTipOpen && (
+          <InfoTooltip
+            isOpen={isInfoToolTipOpen}
+            name="tip "
+            onClose={() => closeAllPopups(true)}
+          >
+            <img
+              className="popup__icon"
+              src={isSuccess ? iconSuccess : iconDenied}
+              alt={isSuccess ? "Успех" : "Неудача"}
+            />
+            <p className="popup__icon-title">
+              {isSuccess ? "Вы успешно зарегистрировались!" : errorMessage}
+            </p>
+          </InfoTooltip>
+        )}
       </CurrentUserContext.Provider>
     </div>
   );
@@ -222,11 +283,8 @@ function App() {
 
 export default App;
 
-
-
-
 // if (path="*")  {
-//   return 
+//   return
 //     <header className="header">
 //     <img className="header__logo" src={logo} alt="Логотип" />
 //   <div>

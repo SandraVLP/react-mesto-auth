@@ -2,14 +2,14 @@ import React from "react";
 // import { useNavigate } from 'react-router-dom';
 import InfoTooltip from "./InfoTooltip";
 import iconDenied from "../images/denied.svg";
-import * as auth from "../auth.js";
+import * as auth from "../utils/auth.js";
 
 class Login extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      email: "",
-      password: "",
+        email: '',
+        password: '',
       tipOpen: false,
       errorMessage: null,
     };
@@ -23,36 +23,33 @@ class Login extends React.Component {
     });
   }
 
-  handleTipClose() {
-    this.setState({ tipOpen: false });
-  }
 
   handleSubmit(e) {
     e.preventDefault();
     // здесь обрабатываем вход в систему
     if (!this.state.email || !this.state.password) {
-        this.setState({
-            errorMessage: "Что-то пошло не так! Попробуйте ещё раз",
-            tipOpen: true,
-          });
+      this.setState({
+        errorMessage: "Что-то пошло не так! Попробуйте ещё раз",
+        tipOpen: true,
+      });
       return;
     }
-    auth
-      .authorize(this.state.email, this.state.password)
-      .then((data) => {
-        if (data.token) {
-          this.setState({ email: "", password: "", tipOpen: false, }, () => {
-            this.props.onLoginSuccess();
-          });
-        }
-        else {
-                  this.setState({
-          errorMessage: data.message,
-          tipOpen: true,
-        });
-        }
-      })
-      .catch((err) => console.log(err));
+    this.props.onLogin(this.state.email,this.state.password);
+    // auth
+    //   .authorize(this.state.email, this.state.password)
+    //   .then((data) => {
+    //     if (data.token) {
+    //       this.setState({ email: "", password: "", tipOpen: false }, () => {
+    //         this.props.onLoginSuccess();
+    //       });
+    //     } else {
+    //       this.setState({
+    //         errorMessage: data.message,
+    //         tipOpen: true,
+    //       });
+    //     }
+    //   })
+    //   .catch((err) => console.log(err));
     //   if (!this.state.email || this.state.password) {
     //     this.setState({
     //       errorMessage: "Что-то пошло не так! Попробуйте ещё раз",
@@ -93,7 +90,7 @@ class Login extends React.Component {
             </div>
           </form>
         </div>
-        {this.state.tipOpen && (
+        {/* {this.state.tipOpen && (
           <InfoTooltip
             isOpen={this.state.tipOpen}
             name="tip "
@@ -102,7 +99,7 @@ class Login extends React.Component {
             <img className="popup__icon" src={iconDenied} alt={"Неудача"} />
             <p className="popup__icon-title">{this.state.errorMessage}</p>
           </InfoTooltip>
-        )}
+        )} */}
       </>
     );
   }
