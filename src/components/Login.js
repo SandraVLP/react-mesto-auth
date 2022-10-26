@@ -35,27 +35,6 @@ class Login extends React.Component {
       return;
     }
     this.props.onLogin(this.state.email,this.state.password);
-    // auth
-    //   .authorize(this.state.email, this.state.password)
-    //   .then((data) => {
-    //     if (data.token) {
-    //       this.setState({ email: "", password: "", tipOpen: false }, () => {
-    //         this.props.onLoginSuccess();
-    //       });
-    //     } else {
-    //       this.setState({
-    //         errorMessage: data.message,
-    //         tipOpen: true,
-    //       });
-    //     }
-    //   })
-    //   .catch((err) => console.log(err));
-    //   if (!this.state.email || this.state.password) {
-    //     this.setState({
-    //       errorMessage: "Что-то пошло не так! Попробуйте ещё раз",
-    //       tipOpen: true,
-    //     });
-    //   }
   }
   render() {
     return (

@@ -28,41 +28,6 @@ class Register extends React.Component {
     e.preventDefault();
     // здесь обработчик регистрации
     this.props.onRegister(this.state.password, this.state.email);
-    // auth.register(this.state.password, this.state.email).then((res) => {
-    //   if (res) {
-    //     this.setState(
-    //       {
-    //         errorMessage: res.error ? res.error : null,
-    //         isSuccess: !res.error,
-    //       },
-    //       () => {
-    //         this.setState({
-    //           tipOpen: true,
-    //         });
-    //       }
-    //     );
-
-    //     // if (res.error) {
-    //     //   this.setState({
-    //     //     errorMessage: res.error,
-    //     //     tipOpen: true,
-    //     //     isSuccess: false,
-    //     //   });
-    //     // } else {
-    //     //   this.setState({
-    //     //     errorMessage: null,
-    //     //     tipOpen: true,
-    //     //     isSuccess: true,
-    //     //   });
-    //     // }
-    //   } else {
-    //     this.setState({
-    //       errorMessage: "Что-то пошло не так! Попробуйте ещё раз.",
-    //       tipOpen: true,
-    //       isSuccess: false,
-    //     });
-    //   }
-    // });
   };
 
 

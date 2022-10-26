@@ -23,6 +23,7 @@ function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setisAddPlacePopupOpen] = useState(false);
   const [isEditAvatarPopupOpen, setisEditAvatarPopupOpen] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [isInfoToolTipOpen, setisInfoToolTipOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
@@ -30,7 +31,7 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [icon, setIcon] = useState(null);
   const navigate = useNavigate();
 
   function closeAllPopups() {
@@ -152,6 +153,8 @@ function App() {
       })
       .catch((err) => {
         handleErrorMessages(err);
+        setIcon(iconDenied);
+        setIsSuccess(false);
         setisInfoToolTipOpen(true);
       });
   };
@@ -161,14 +164,16 @@ function App() {
       .register(password, email)
       .then((res) => {
         if (res) {
+          setIsSuccess(true);
+          setIcon(iconSuccess);
           setErrorMessage(null);
           setisInfoToolTipOpen(true);
-          setIsSuccess(true);
         }
       })
       .catch((err) => {
-        handleErrorMessages(err);
         setIsSuccess(false);
+        setIcon(iconDenied);
+        handleErrorMessages(err);
         setisInfoToolTipOpen(true);
       });
   }
@@ -260,22 +265,28 @@ function App() {
     isOpen={}
     /> */}
         <ImagePopup card={selectedCard} onClose={() => closeAllPopups(true)} />
-        {isInfoToolTipOpen && (
+       
           <InfoTooltip
             isOpen={isInfoToolTipOpen}
             name="tip "
             onClose={() => closeAllPopups(true)}
           >
-            <img
+            {/* <img
               className="popup__icon"
               src={isSuccess ? iconSuccess : iconDenied}
               alt={isSuccess ? "Успех" : "Неудача"}
+            /> */}
+                        <img
+              className="popup__icon"
+              src={icon}
+              alt={isSuccess ? "Успех" : "Неудача"}
             />
+
             <p className="popup__icon-title">
               {isSuccess ? "Вы успешно зарегистрировались!" : errorMessage}
             </p>
           </InfoTooltip>
-        )}
+        )
       </CurrentUserContext.Provider>
     </div>
   );
@@ -283,32 +294,3 @@ function App() {
 
 export default App;
 
-// if (path="*")  {
-//   return
-//     <header className="header">
-//     <img className="header__logo" src={logo} alt="Логотип" />
-//   <div>
-//     {" "}
-//     <p className="header__login">{props.email}</p>{" "}
-//     <button onClick={props.signOut}  className="header__login">
-//       Выйти
-//     </button>
-//     </div>
-//      </header>
-//  } if (path="/signup") {
-//    return
-//   <header className="header">
-//   <img className="header__logo" src={logo} alt="Логотип" />
-//   <Link to="/signin" className="header__login">
-//     Войти
-//   </Link>
-//   </header>
-// } else {
-// return
-// (  <header className="header">
-// <img className="header__logo" src={logo} alt="Логотип" />
-// <Link to="/signup" className="header__login">
-// Регистрация
-// </Link>
-// </header>)
-// }
